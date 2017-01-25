@@ -32,6 +32,7 @@ public class PlayerController : MonoBehaviour {
 	private PlayerHealth playerHealth;
 	private PlayerReload playerReload;
 	private SpriteRenderer spriteRender;
+	private PlayerSoundManager soundManager;
 
 	private string vAxisName = "Vertical";
 	private string hAxisName = "Horizontal";
@@ -44,6 +45,7 @@ public class PlayerController : MonoBehaviour {
 		playerReload = playerReloadObject.GetComponent<PlayerReload> ();
 		playerReload.reloadSpeed = ReloadSpeed;
 		spriteRender = GetComponent<SpriteRenderer> ();
+		soundManager = GetComponentInChildren<PlayerSoundManager> ();
 
 		if (SecondPlayer) {
 			vAxisName += "Second";
@@ -66,6 +68,7 @@ public class PlayerController : MonoBehaviour {
 		if (vertical != 0) {
 			Vector2 engineForce = Vector2.Lerp (Vector2.zero, localUp * vertical * MaximalSpeed, Velocity * Time.deltaTime);
 			rb.AddForce (engineForce);
+			soundManager.PlayRide ();
 		}
 
 		SetupParticles (vertical);
@@ -92,6 +95,7 @@ public class PlayerController : MonoBehaviour {
 			timer = 0.0f;
 			rb.AddForce (-localUp * ShootingKick);
 			playerReload.Reload ();
+			soundManager.PlayShoot ();
 		}
 
 		timer += Time.deltaTime;
@@ -114,11 +118,14 @@ public class PlayerController : MonoBehaviour {
 			burnParticles.Play ();
 		}
 
-		if (playerHealth.curHealth == 0 && !GameManager.isGamePaused()) {
+		if (playerHealth.curHealth == 0 && !GameManager.isGamePaused ()) {
 			//GameOver
 			spriteRender.sprite = killedTankSprite;
 			explodeParticles.Play ();
 			gameManager.FinishGame (SecondPlayer);
+			soundManager.PlayDeath ();
+		} else {
+			soundManager.PlayHurt ();
 		}
 	}
 
