@@ -56,8 +56,13 @@ public class PlayerHealth : MonoBehaviour
 
 		float currentSpriteNumber = healthSprites.Length * ((float)curHealth / (float)maxHealth) - 1;
 		float lerpHealth = Mathf.Lerp (visibleHealthSprite, currentSpriteNumber, Time.deltaTime * healthAnimationSpeed);
-		spriteRender.sprite = healthSprites [(int)lerpHealth];
+		int spriteNum = (int)lerpHealth;
+		if (spriteNum < 0) {
+			spriteNum = 0;
+		} else if (spriteNum >= healthSprites.Length) {
+			spriteNum = healthSprites.Length - 1;
+		}
+		spriteRender.sprite = healthSprites [spriteNum];
 		visibleHealthSprite = lerpHealth;
-	//	healthBarLength = (Screen.width / 6) * (curHealth / (float)maxHealth);
 	}
 }

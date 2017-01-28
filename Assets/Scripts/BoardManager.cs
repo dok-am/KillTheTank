@@ -79,15 +79,24 @@ public class BoardManager : MonoBehaviour {
 		for (int i = 0; i < objectCount; i++) {
 			Vector3 randomPosition = RandomPosition();
 			GameObject tileChoice = tileArray [Random.Range (0, tileArray.Length)];
-			Instantiate (tileChoice, randomPosition, Quaternion.identity);
+			GameObject instance = Instantiate (tileChoice, randomPosition, Quaternion.identity);
+			instance.transform.SetParent(boardHolder);
 		}
 	}
 
 	public void SetupScene() 
 	{
+		ClearBoard ();
 		BoardSetup ();
 		InitializeList ();
 		LayoutObjectAtRandom (destructibleTiles, new Count(destructibleCount/2, destructibleCount));
+	}
+
+	void ClearBoard()
+	{
+		if (boardHolder) {
+			Destroy (boardHolder.gameObject);
+		}
 	}
 
 }
