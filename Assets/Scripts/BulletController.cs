@@ -11,6 +11,7 @@ public class BulletController : MonoBehaviour {
 	private Rigidbody2D rb;
 	private BoxCollider2D boxCollider;
 	private SpriteRenderer spriteRenderer;
+	private AudioSource audioPlayer;
 	private bool blasting = false;
 	private float timer = 0.0f;
 
@@ -19,6 +20,7 @@ public class BulletController : MonoBehaviour {
 		rb = GetComponent<Rigidbody2D> ();
 		spriteRenderer = GetComponent<SpriteRenderer> ();
 		boxCollider = GetComponent<BoxCollider2D> ();
+		audioPlayer = GetComponent<AudioSource> ();
 	}
 	
 	// Update is called once per frame
@@ -47,6 +49,7 @@ public class BulletController : MonoBehaviour {
 	}
 
 	void OnCollisionEnter2D(Collision2D collision) {
+		audioPlayer.Play ();
 		if (boxCollider) {
 			boxCollider.enabled = false;
 		}

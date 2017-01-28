@@ -22,17 +22,14 @@ public class PlayerController : MonoBehaviour {
 	public ParticleSystem burnParticles;
 	public ParticleSystem explodeParticles;
 
-	public Sprite normalTankSprite;
-	public Sprite killedTankSprite;
-
 	public GameManager gameManager;
 
 	private Rigidbody2D rb;
 	private float timer = 0;
 	private PlayerHealth playerHealth;
 	private PlayerReload playerReload;
-	private SpriteRenderer spriteRender;
 	private PlayerSoundManager soundManager;
+	private Animator animator;
 
 	private string vAxisName = "Vertical";
 	private string hAxisName = "Horizontal";
@@ -44,7 +41,7 @@ public class PlayerController : MonoBehaviour {
 		playerHealth = playerHealthObject.GetComponent<PlayerHealth> ();
 		playerReload = playerReloadObject.GetComponent<PlayerReload> ();
 		playerReload.reloadSpeed = ReloadSpeed;
-		spriteRender = GetComponent<SpriteRenderer> ();
+		animator = GetComponent<Animator> ();
 		soundManager = GetComponentInChildren<PlayerSoundManager> ();
 
 		if (SecondPlayer) {
@@ -69,6 +66,9 @@ public class PlayerController : MonoBehaviour {
 			Vector2 engineForce = Vector2.Lerp (Vector2.zero, localUp * vertical * MaximalSpeed, Velocity * Time.deltaTime);
 			rb.AddForce (engineForce);
 			soundManager.PlayRide ();
+			animator.SetBool ("isMoving", true);
+		} else {
+			animator.SetBool ("isMoving", false);
 		}
 
 		SetupParticles (vertical);
@@ -120,7 +120,8 @@ public class PlayerController : MonoBehaviour {
 
 		if (playerHealth.curHealth == 0 && !GameManager.isGamePaused ()) {
 			//GameOver
-			spriteRender.sprite = killedTankSprite;
+			animator.SetBool("isMoving", false);
+			animator.SetBool("isKilled", true);
 			explodeParticles.Play ();
 			gameManager.FinishGame (SecondPlayer);
 			soundManager.PlayDeath ();
@@ -132,7 +133,7 @@ public class PlayerController : MonoBehaviour {
 	public void ResetPosition () {
 		transform.localPosition = Vector3.zero;
 		transform.localRotation = new Quaternion (0.0f, 0.0f, (SecondPlayer) ? 180.0f : 0.0f, 0.0f);
-		spriteRender.sprite = normalTankSprite;
+		animator.SetBool ("isKilled", false);
 		if (burnParticles.isPlaying)
 			burnParticles.Stop ();
 	}

@@ -1,13 +1,12 @@
 fileFormatVersion: 2
-guid: 14156dd7b25ad4ef1ab2946bd176566d
-timeCreated: 1485605836
+guid: 3d10fae30b0194ceb9ff6652c784a550
+timeCreated: 1485604859
 licenseType: Free
 TextureImporter:
   fileIDToRecycleName:
-    21300000: TankKilled_0
-    21300002: TankKilled_1
-    21300004: TankKilled_2
-    21300006: TankKilled_3
+    21300000: Tank02Move_0
+    21300002: Tank02Move_1
+    21300004: Tank02Move_2
   serializedVersion: 4
   mipmaps:
     mipMapMode: 0
@@ -98,7 +97,7 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: TankKilled_0
+      name: Tank02Move_0
       rect:
         serializedVersion: 2
         x: 0
@@ -106,12 +105,12 @@ TextureImporter:
         width: 96
         height: 96
       alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       tessellationDetail: 0
     - serializedVersion: 2
-      name: TankKilled_1
+      name: Tank02Move_1
       rect:
         serializedVersion: 2
         x: 96
@@ -124,23 +123,10 @@ TextureImporter:
       outline: []
       tessellationDetail: 0
     - serializedVersion: 2
-      name: TankKilled_2
+      name: Tank02Move_2
       rect:
         serializedVersion: 2
         x: 0
-        y: 0
-        width: 96
-        height: 96
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      tessellationDetail: 0
-    - serializedVersion: 2
-      name: TankKilled_3
-      rect:
-        serializedVersion: 2
-        x: 96
         y: 0
         width: 96
         height: 96
