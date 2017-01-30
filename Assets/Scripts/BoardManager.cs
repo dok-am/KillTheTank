@@ -27,6 +27,8 @@ public class BoardManager : MonoBehaviour {
 	public int destructibleCount = 100;
 	public GameObject[] destructibleTiles;
 
+	public GameObject heartObject;
+
 	private Transform boardHolder;
 	private List<Vector3> gridPositions =  new List<Vector3>();
 
@@ -97,6 +99,12 @@ public class BoardManager : MonoBehaviour {
 		if (boardHolder) {
 			Destroy (boardHolder.gameObject);
 		}
+	}
+
+	public void AddRandomHeart() {
+		Vector3 randomPosition = RandomPosition();
+		GameObject instance = Instantiate (heartObject, randomPosition, Quaternion.identity);
+		instance.transform.SetParent (boardHolder);
 	}
 
 }

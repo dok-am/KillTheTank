@@ -19,7 +19,10 @@ public class GameManager : MonoBehaviour
 	public bool isGameBegan = false;
 	public bool isPaused = true;
 
+	public float HeartAppearRate = 30.0f;
+
 	private BoardManager boardScript;
+	private float heartTimer = 0.0f;
 
 	void Awake ()
 	{
@@ -39,6 +42,17 @@ public class GameManager : MonoBehaviour
 				}
 			} else {
 				PauseGame ();
+			}
+		}
+	}
+
+	void FixedUpdate () {
+		if (isGameBegan && !isPaused) {
+			heartTimer += Time.deltaTime;
+
+			if (heartTimer >= HeartAppearRate) {
+				boardScript.AddRandomHeart ();
+				heartTimer = 0;
 			}
 		}
 	}

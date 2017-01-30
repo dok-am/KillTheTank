@@ -130,6 +130,10 @@ public class PlayerController : MonoBehaviour {
 		}
 	}
 
+	public void Heal (int health) {
+		playerHealth.AdjustCurrentHealth (health);
+	}
+
 	public void ResetPosition () {
 		transform.localPosition = Vector3.zero;
 		transform.localRotation = new Quaternion (0.0f, 0.0f, (SecondPlayer) ? 180.0f : 0.0f, 0.0f);
