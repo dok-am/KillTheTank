@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerHealth : MonoBehaviour
+public class PlayerHealth : HideableSprite
 {
 
 	public Transform target;
@@ -14,13 +14,12 @@ public class PlayerHealth : MonoBehaviour
 
 	public Sprite[] healthSprites;
 
-	private SpriteRenderer spriteRender;
 	private float visibleHealthSprite;
 
 	// Use this for initialization
 	void Awake ()
 	{
-		spriteRender = GetComponent<SpriteRenderer> ();
+		base.Awake ();
 		visibleHealthSprite = healthSprites.Length-1;
 	}
 
@@ -32,6 +31,7 @@ public class PlayerHealth : MonoBehaviour
 	// Update is called once per frame
 	void Update ()
 	{
+		base.Update ();
 		AdjustCurrentHealth (0);   
 	}
 
@@ -62,7 +62,9 @@ public class PlayerHealth : MonoBehaviour
 		} else if (spriteNum >= healthSprites.Length) {
 			spriteNum = healthSprites.Length - 1;
 		}
+
 		spriteRender.sprite = healthSprites [spriteNum];
 		visibleHealthSprite = lerpHealth;
 	}
+		
 }

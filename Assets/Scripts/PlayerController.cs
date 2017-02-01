@@ -138,8 +138,31 @@ public class PlayerController : MonoBehaviour {
 		transform.localPosition = Vector3.zero;
 		transform.localRotation = new Quaternion (0.0f, 0.0f, (SecondPlayer) ? 180.0f : 0.0f, 0.0f);
 		animator.SetBool ("isKilled", false);
+		playerHealth.Show ();
+		playerReload.Show ();
 		if (burnParticles.isPlaying)
 			burnParticles.Stop ();
 	}
 		
+
+	void OnTriggerEnter2D(Collider2D collider) {
+		if (collider.gameObject.CompareTag ("Cover")) {
+			playerHealth.Hide ();
+			playerReload.Hide ();
+		}
+	}
+
+	void OnTriggerStay2D(Collider2D collider) {
+		if (collider.gameObject.CompareTag ("Cover")) {
+			playerHealth.Hide ();
+			playerReload.Hide ();
+		}
+	}
+
+	void OnTriggerExit2D(Collider2D collider) {
+		if (collider.gameObject.CompareTag ("Cover")) {
+			playerHealth.Show ();
+			playerReload.Show ();
+		}
+	}
 }

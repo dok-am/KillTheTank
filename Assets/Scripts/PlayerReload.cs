@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerReload : MonoBehaviour {
+public class PlayerReload : HideableSprite {
 
 	public Transform target;
 
@@ -10,12 +10,12 @@ public class PlayerReload : MonoBehaviour {
 
 	public Sprite[] reloadSprites;
 
-	private SpriteRenderer spriteRender;
 	private float timer = 0.0f;
 
 	// Use this for initialization
 	void Awake ()
 	{
+		base.Awake ();
 		spriteRender = GetComponent<SpriteRenderer> ();
 	}
 
@@ -27,6 +27,7 @@ public class PlayerReload : MonoBehaviour {
 	// Update is called once per frame
 	void Update ()
 	{
+		base.Update ();
 		if (timer <= reloadSpeed) {
 			float currentSpriteNumber = reloadSprites.Length * (timer / reloadSpeed) - 1;
 			if (currentSpriteNumber < 0) {
@@ -41,5 +42,4 @@ public class PlayerReload : MonoBehaviour {
 	public void Reload () {
 		timer = 0.0f;
 	}
-
 }

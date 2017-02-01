@@ -29,6 +29,9 @@ public class BoardManager : MonoBehaviour {
 
 	public GameObject heartObject;
 
+	public int grassFieldSize = 9;
+	public GameObject grassObject;
+
 	private Transform boardHolder;
 	private List<Vector3> gridPositions =  new List<Vector3>();
 
@@ -86,11 +89,37 @@ public class BoardManager : MonoBehaviour {
 		}
 	}
 
+	void AddRandomGrassField () {
+
+		int randomX = Random.Range (1, columns - grassFieldSize - 1);
+		int randomY = Random.Range (1, rows - grassFieldSize - 1);
+
+
+		for (int x = randomX; x < (randomX + grassFieldSize); x++) {
+			for (int y = randomY; y < (randomY + grassFieldSize); y++) {
+				int randomSeed = Random.Range (0, 3);
+				if (randomSeed < 2) {
+					GameObject grass = Instantiate (grassObject, new Vector3(x,y,0.0f), Quaternion.identity);
+					grass.transform.SetParent (boardHolder);
+
+					Predicate<Vector3> vectorPred = (Vector3 v) => {
+						return (v.x == (float)x && v.y == (float)y);
+					};
+					int index = gridPositions.FindIndex (vectorPred);
+					if (index >= 0 && index < gridPositions.Count) {
+						gridPositions.RemoveAt (index);
+					}
+				}
+			}
+		}
+	}
+
 	public void SetupScene() 
 	{
 		ClearBoard ();
 		BoardSetup ();
 		InitializeList ();
+		AddRandomGrassField ();
 		LayoutObjectAtRandom (destructibleTiles, new Count(destructibleCount/2, destructibleCount));
 	}
 
