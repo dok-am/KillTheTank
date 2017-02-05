@@ -14,6 +14,8 @@ public class PlayerHealth : HideableSprite
 
 	public Sprite[] healthSprites;
 
+	public SpriteDuplicator duplicator;
+
 	private float visibleHealthSprite;
 
 	// Use this for initialization
@@ -64,6 +66,7 @@ public class PlayerHealth : HideableSprite
 		}
 
 		spriteRender.sprite = healthSprites [spriteNum];
+		duplicator.SetSprite (healthSprites [spriteNum]);
 		visibleHealthSprite = lerpHealth;
 	}
 		

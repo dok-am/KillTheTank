@@ -10,6 +10,8 @@ public class PlayerReload : HideableSprite {
 
 	public Sprite[] reloadSprites;
 
+	public SpriteDuplicator duplicator;
+
 	private float timer = 0.0f;
 
 	// Use this for initialization
@@ -34,6 +36,7 @@ public class PlayerReload : HideableSprite {
 				currentSpriteNumber = 0;
 			}
 			spriteRender.sprite = reloadSprites [(int)currentSpriteNumber];
+			duplicator.SetSprite (reloadSprites [(int)currentSpriteNumber]);
 		}
 
 		timer += Time.deltaTime;
