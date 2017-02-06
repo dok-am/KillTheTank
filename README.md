@@ -12,4 +12,13 @@ Version history
 
 Basic game
 
+*v.0.2*
+-
+
+* Implemented more game mechanics:
+* ~Health pickup~
+* ~Grass for hiding~
+* ~Nuclear bullets~
+* Added sound settings
+
 --
