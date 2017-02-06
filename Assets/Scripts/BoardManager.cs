@@ -28,6 +28,7 @@ public class BoardManager : MonoBehaviour {
 	public GameObject[] destructibleTiles;
 
 	public GameObject heartObject;
+	public GameObject nuclearPickup;
 
 	public int grassFieldSize = 9;
 	public GameObject grassObject;
@@ -133,6 +134,12 @@ public class BoardManager : MonoBehaviour {
 	public void AddRandomHeart() {
 		Vector3 randomPosition = RandomPosition();
 		GameObject instance = Instantiate (heartObject, randomPosition, Quaternion.identity);
+		instance.transform.SetParent (boardHolder);
+	}
+
+	public void AddRandomNuclearPickup() {
+		Vector3 randomPosition = RandomPosition();
+		GameObject instance = Instantiate (nuclearPickup, randomPosition, Quaternion.identity);
 		instance.transform.SetParent (boardHolder);
 	}
 

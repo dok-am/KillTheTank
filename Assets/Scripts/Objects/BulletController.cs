@@ -6,6 +6,8 @@ public class BulletController : MonoBehaviour {
 
 	public float BulletSpeed = 50.0f;
 	public float AccelerationTime = 1.0f;
+	public int Damage = 10;
+	public int WallDamage = 1;
 	public ParticleSystem blastParticles;
 
 	private Rigidbody2D rb;
@@ -54,10 +56,10 @@ public class BulletController : MonoBehaviour {
 			boxCollider.enabled = false;
 		}
 		if (collision.gameObject.CompareTag ("Destructible")) {
-			collision.gameObject.SendMessage ("TakeDamage", 1);
+			collision.gameObject.SendMessage ("TakeDamage", WallDamage);
 		}
 		if (collision.gameObject.CompareTag ("Player")) {
-			collision.gameObject.SendMessage ("TakeDamage", 10);
+			collision.gameObject.SendMessage ("TakeDamage", Damage);
 		}
 		if (spriteRenderer) {
 			spriteRenderer.sprite = null;

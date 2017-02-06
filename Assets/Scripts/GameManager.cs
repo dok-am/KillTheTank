@@ -20,9 +20,11 @@ public class GameManager : MonoBehaviour
 	public bool isPaused = true;
 
 	public float HeartAppearRate = 30.0f;
+	public float NuclearAppearRate = 7.0f;
 
 	private BoardManager boardScript;
 	private float heartTimer = 0.0f;
+	private float nuclearTimer = 0.0f;
 
 	void Awake ()
 	{
@@ -49,10 +51,16 @@ public class GameManager : MonoBehaviour
 	void FixedUpdate () {
 		if (isGameBegan && !isPaused) {
 			heartTimer += Time.deltaTime;
+			nuclearTimer += Time.deltaTime;
 
 			if (heartTimer >= HeartAppearRate) {
 				boardScript.AddRandomHeart ();
-				heartTimer = 0;
+				heartTimer = 0.0f;
+			}
+
+			if (nuclearTimer >= NuclearAppearRate) {
+				boardScript.AddRandomNuclearPickup ();
+				nuclearTimer = 0.0f;
 			}
 		}
 	}

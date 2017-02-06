@@ -31,6 +31,8 @@ public class PlayerController : MonoBehaviour {
 	private PlayerSoundManager soundManager;
 	private Animator animator;
 
+	private GameObject nextBullet;
+
 	private string vAxisName = "Vertical";
 	private string hAxisName = "Horizontal";
 	private string attackAxisName = "Attack";
@@ -43,6 +45,7 @@ public class PlayerController : MonoBehaviour {
 		playerReload.reloadSpeed = ReloadSpeed;
 		animator = GetComponent<Animator> ();
 		soundManager = GetComponentInChildren<PlayerSoundManager> ();
+		nextBullet = Bullet;
 
 		if (SecondPlayer) {
 			vAxisName += "Second";
@@ -83,19 +86,14 @@ public class PlayerController : MonoBehaviour {
 				rb.MoveRotation (rb.rotation - RotationSpeed * horizontal);
 			}
 		}
-
-
+			
 
 		if ((dot != 1) && (dot != -1) && (velocityVector.magnitude != 0)) {
 			rb.velocity = Vector2.Lerp (rb.velocity, localUp * dot * rb.velocity.magnitude, FrictionScale * Time.deltaTime);
 		}
 
 		if (shoot != 0 && timer >= ReloadSpeed) {
-			Instantiate (Bullet, transform.position + new Vector3(localUp.x, localUp.y, 0.0f) * 0.5f, transform.rotation);
-			timer = 0.0f;
-			rb.AddForce (-localUp * ShootingKick);
-			playerReload.Reload ();
-			soundManager.PlayShoot ();
+			Shoot (localUp);
 		}
 
 		timer += Time.deltaTime;
@@ -111,6 +109,22 @@ public class PlayerController : MonoBehaviour {
 			trackParticles.Stop ();
 		}
 	}
+
+	void Shoot (Vector2 localUp) {
+		Instantiate (nextBullet, transform.position + new Vector3(localUp.x, localUp.y, 0.0f) * 0.5f, transform.rotation);
+		timer = 0.0f;
+		rb.AddForce (-localUp * ShootingKick);
+		playerReload.Reload ();
+		soundManager.PlayShoot ();
+
+		nextBullet = Bullet;
+	}
+
+	/*
+	 * 
+	 * Public functions
+	 * 
+	 */
 
 	public void TakeDamage (int damage) {
 		playerHealth.AdjustCurrentHealth (-damage);
@@ -143,7 +157,16 @@ public class PlayerController : MonoBehaviour {
 		if (burnParticles.isPlaying)
 			burnParticles.Stop ();
 	}
-		
+
+	public void SetNextBullet (GameObject bullet) {
+		nextBullet = bullet;
+	}
+
+	/*
+	 * 
+	 * Collider delegates
+	 *
+	 */
 
 	void OnTriggerEnter2D(Collider2D collider) {
 		if (collider.gameObject.CompareTag ("Cover")) {
