@@ -8,12 +8,13 @@ public class SpriteDuplicator : MonoBehaviour {
 	private Image image;
 
 	// Use this for initialization
-	void Start () {
+	void Awake () {
 		image = GetComponent<Image> ();
 	}
 	
 	public void SetSprite(Sprite sprite) 
 	{
-		image.sprite = sprite;
+		if (image)
+			image.sprite = sprite;
 	}
 }

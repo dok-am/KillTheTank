@@ -16,11 +16,15 @@ public class GameManager : MonoBehaviour
 	public GameObject resumeGameButton;
 	public Text winText;
 
-	public bool isGameBegan = false;
-	public bool isPaused = true;
+	public bool isGameBegan = true;
+	public bool isPaused = false;
+	public bool isMenuShown = false;
 
 	public float HeartAppearRate = 30.0f;
 	public float NuclearAppearRate = 7.0f;
+
+	private int Player1Score = 0;
+	private int Player2Score = 0;
 
 	private BoardManager boardScript;
 	private float heartTimer = 0.0f;
@@ -30,6 +34,7 @@ public class GameManager : MonoBehaviour
 	{
 		boardScript = GetComponent<BoardManager> ();
 		winText.enabled = false;
+		StartGame ();
 	}
 
 	void Update () {
@@ -44,6 +49,13 @@ public class GameManager : MonoBehaviour
 				}
 			} else {
 				PauseGame ();
+			}
+		}
+
+		bool enter = Input.GetButtonDown ("Submit");
+		if (enter) {
+			if (!isGameBegan && !isMenuShown) {
+				StartGame ();
 			}
 		}
 	}
@@ -84,6 +96,8 @@ public class GameManager : MonoBehaviour
 
 	public void StartGame ()
 	{
+		winText.text = "";
+		winText.enabled = false;
 		boardScript.SetupScene ();
 		ResetPlayers ();
 		isGameBegan = true;
@@ -92,44 +106,41 @@ public class GameManager : MonoBehaviour
 
 	public void PauseGame ()
 	{
-		winText.text = "";
-		winText.enabled = false;
-
-		if (isGameBegan) {
-			restartButtonText.text = "RESTART";
-			resumeGameButton.SetActive (true);
-		} else {
-			restartButtonText.text = "START GAME";
-			resumeGameButton.SetActive (false);
-		}
 		mainMenu.SetActive (true);
 		isPaused = true;
+		isMenuShown = true;
 	}
 
 	public void ResumeGame () {
 		mainMenu.SetActive (false);
 		isPaused = false;
+		isMenuShown = false;
 	}
 
 	public void FinishGame (bool firstPlayerWin) {
 		isGameBegan = false;
 		isPaused = true;
 
-		string playerNum = "1";
-		if (!firstPlayerWin)
+		string playerNum;
+		if (!firstPlayerWin) {
 			playerNum = "2";
+			Player2Score++;
+		} else {
+			playerNum = "1";
+			Player1Score++;
+		}
 
-		winText.text = "Player " + playerNum + " Win!\n\nPress esc to\ncontinue";
+		winText.text = "Player " + playerNum + " Win!\nScore " + Player1Score + " : " + Player2Score + "\nPress enter to\ncontinue";
 		winText.enabled = true;
 	}
 
-	public void QuitGame ()
-	{
-	#if UNITY_EDITOR 
-		UnityEditor.EditorApplication.isPlaying = false;
-	#else
-		Application.Quit();
-	#endif
+	public int GetScoreForPlayer(int playerNum) {
+		if (playerNum == 1)
+			return Player1Score;
+		if (playerNum == 2)
+			return Player2Score;
+
+		return 0;
 	}
 
 }

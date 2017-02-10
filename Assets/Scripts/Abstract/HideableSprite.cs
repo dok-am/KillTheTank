@@ -10,13 +10,13 @@ public class HideableSprite : MonoBehaviour {
 	private Color hidingAlpha;
 
 	// Use this for initialization
-	public void Awake () {
+	protected virtual void Awake () {
 		spriteRender = GetComponent<SpriteRenderer> ();
 		hidingAlpha = spriteRender.color;
 	}
-	
+
 	// Update is called once per frame
-	public void Update () {
+	protected virtual void Update () {
 		if (!hidingAlpha.Equals(spriteRender.color)) {
 			spriteRender.color = Color.Lerp (spriteRender.color, hidingAlpha, Time.deltaTime * 2.0f);
 		}

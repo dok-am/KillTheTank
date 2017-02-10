@@ -15,7 +15,7 @@ public class PlayerReload : HideableSprite {
 	private float timer = 0.0f;
 
 	// Use this for initialization
-	void Awake ()
+	protected override void Awake ()
 	{
 		base.Awake ();
 		spriteRender = GetComponent<SpriteRenderer> ();
@@ -27,7 +27,7 @@ public class PlayerReload : HideableSprite {
 	}
 
 	// Update is called once per frame
-	void Update ()
+	protected override void Update ()
 	{
 		base.Update ();
 		if (timer <= reloadSpeed) {

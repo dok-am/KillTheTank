@@ -19,7 +19,7 @@ public class PlayerHealth : HideableSprite
 	private float visibleHealthSprite;
 
 	// Use this for initialization
-	void Awake ()
+	protected override void Awake ()
 	{
 		base.Awake ();
 		visibleHealthSprite = healthSprites.Length-1;
@@ -31,7 +31,7 @@ public class PlayerHealth : HideableSprite
 	}
 
 	// Update is called once per frame
-	void Update ()
+	protected override void Update ()
 	{
 		base.Update ();
 		AdjustCurrentHealth (0);   
