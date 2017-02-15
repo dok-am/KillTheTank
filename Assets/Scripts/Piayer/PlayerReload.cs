@@ -36,7 +36,8 @@ public class PlayerReload : HideableSprite {
 				currentSpriteNumber = 0;
 			}
 			spriteRender.sprite = reloadSprites [(int)currentSpriteNumber];
-			duplicator.SetSprite (reloadSprites [(int)currentSpriteNumber]);
+			if (duplicator)
+				duplicator.SetSprite (reloadSprites [(int)currentSpriteNumber]);
 		}
 
 		timer += Time.deltaTime;
