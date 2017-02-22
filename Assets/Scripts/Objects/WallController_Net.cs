@@ -17,6 +17,7 @@ public class WallController_Net : NetworkBehaviour {
 		spriteRenderer = GetComponent<SpriteRenderer> ();
 	}
 
+	[Server]
 	public void TakeDamage (int damage) {
 		currentWallState += damage;
 		if (currentWallState >= WallStates.Length) {
@@ -29,6 +30,7 @@ public class WallController_Net : NetworkBehaviour {
 		spriteRenderer.sprite = WallStates [currentWallState];
 	}
 
+	[Server]
 	void BlowTheWall () {
 		//Destroy (gameObject);
 		NetworkServer.Destroy (gameObject);

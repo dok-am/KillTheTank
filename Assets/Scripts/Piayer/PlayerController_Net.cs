@@ -6,16 +6,14 @@ using UnityEngine.Networking;
 public class PlayerController_Net : NetworkBehaviour {
 
 	public bool SecondPlayer = false;
-
-	public GameObject playerHealthObject;
-	public GameObject playerReloadObject;
+	public bool isDead = false;
 
 	public float Velocity = 7.0f;
 	public float MaximalSpeed = 40.0f;
 	public float RotationSpeed = 2.0f;
 	public float FrictionScale = 10.0f;
 
-	public float ReloadSpeed = 1.0f;
+
 	public float ShootingKick = 70.0f;
 
 	public GameObject Bullet;
@@ -23,13 +21,12 @@ public class PlayerController_Net : NetworkBehaviour {
 	public ParticleSystem burnParticles;
 	public ParticleSystem explodeParticles;
 
-	public GameObject HealthObject;
-	public GameObject ReloadObject;
-
 	private Rigidbody2D rb;
-	private float timer = 0;
-	private PlayerHealth playerHealth;
-	private PlayerReload playerReload;
+
+
+	private PlayerHealth_Net playerHealth;
+	private PlayerReload_Net playerReload;
+
 	private PlayerSoundManager soundManager;
 	private Animator animator;
 
@@ -45,8 +42,9 @@ public class PlayerController_Net : NetworkBehaviour {
 		animator = GetComponent<Animator> ();
 		soundManager = GetComponentInChildren<PlayerSoundManager> ();
 		nextBullet = Bullet;
-		AddHealth ();
-		AddReload ();
+
+		playerHealth = GetComponent<PlayerHealth_Net> ();
+		playerReload = GetComponent<PlayerReload_Net> ();
 
 		if (SecondPlayer) {
 			vAxisName += "Second";
@@ -54,32 +52,20 @@ public class PlayerController_Net : NetworkBehaviour {
 			attackAxisName += "Second";
 		}
 	}
-
-	void AddHealth () {
-		GameObject health = Instantiate (HealthObject, 
-			new Vector3 (transform.position.x, transform.position.y + 0.8f, 0.0f), 
-			Quaternion.identity);
 		
-		playerHealth = health.GetComponent<PlayerHealth> ();
-		playerHealth.target = transform;
-	}
-
-	void AddReload () {
-		GameObject reload = Instantiate (ReloadObject, 
-			new Vector3 (transform.position.x, transform.position.y + 0.92f, 0.0f), 
-			Quaternion.identity);
 		
-		playerReload = reload.GetComponent<PlayerReload> ();
-		playerReload.target = transform;
-		playerReload.reloadSpeed = ReloadSpeed;
-	}
 
 	void FixedUpdate() {
 
-		if (!isLocalPlayer)
-			return;
+		CheckAlive ();
 
-		if (FindObjectOfType<GameManager_Net>().isPaused)
+		GameManager_Net manager = FindObjectOfType<GameManager_Net> ();
+
+		if (manager)
+			if (manager.isPaused)
+				return;
+
+		if (!isLocalPlayer)
 			return;
 
 		float vertical = Input.GetAxisRaw (vAxisName);
@@ -115,11 +101,9 @@ public class PlayerController_Net : NetworkBehaviour {
 			rb.velocity = Vector2.Lerp (rb.velocity, localUp * dot * rb.velocity.magnitude, FrictionScale * Time.deltaTime);
 		}
 
-		if (shoot != 0 && timer >= ReloadSpeed) {
+		if (shoot != 0 && playerReload.isReadyToShoot) {
 			Shoot (localUp);
 		}
-
-		timer += Time.deltaTime;
 
 	}
 
@@ -133,11 +117,17 @@ public class PlayerController_Net : NetworkBehaviour {
 		}
 	}
 
+	[Command]
+	void CmdSpawnBullet (Vector2 localUp) {
+		GameObject bullet = Instantiate (nextBullet, transform.position + new Vector3(localUp.x, localUp.y, 0.0f) * 0.5f, transform.rotation);
+		NetworkServer.Spawn (bullet);
+	}
+
 	void Shoot (Vector2 localUp) {
-		Instantiate (nextBullet, transform.position + new Vector3(localUp.x, localUp.y, 0.0f) * 0.5f, transform.rotation);
-		timer = 0.0f;
+		CmdSpawnBullet (localUp);
 		rb.AddForce (-localUp * ShootingKick);
-		//playerReload.Reload ();
+		playerReload.isReadyToShoot = false;
+		playerReload.CmdReload ();
 		soundManager.PlayShoot ();
 
 		nextBullet = Bullet;
@@ -149,36 +139,50 @@ public class PlayerController_Net : NetworkBehaviour {
 	 * 
 	 */
 
+	[Server]
 	public void TakeDamage (int damage) {
-	/*	playerHealth.AdjustCurrentHealth (-damage);
-		if (playerHealth.curHealth <= 20 && !burnParticles.isPlaying) {
+		playerHealth.AdjustCurrentHealth (-damage);
+		soundManager.PlayHurt ();
+		if (playerHealth.curHealth <= 0 && !FindObjectOfType<GameManager_Net> ().isPaused) {
+			FindObjectOfType<GameManager_Net>().FinishGame (SecondPlayer);
+		}
+	}
+
+	[ClientRpc]
+	void RpcCheckPlayerAlive () {
+		CheckAlive ();
+	}
+
+	[Client]
+	void CheckAlive () {
+		if (playerHealth.curHealth <= 25 && !burnParticles.isPlaying) {
 			burnParticles.Play ();
 		}
 
-		if (playerHealth.curHealth == 0 && !GameManager.isGamePaused ()) {
+		if (playerHealth.curHealth <= 0 && !FindObjectOfType<GameManager_Net>().isPaused && !isDead) {
 			//GameOver
 			animator.SetBool("isMoving", false);
 			animator.SetBool("isKilled", true);
 			explodeParticles.Play ();
-			FindObjectOfType<GameManager_Net>().FinishGame (SecondPlayer);
 			soundManager.PlayDeath ();
-		} else {
-			soundManager.PlayHurt ();
-		}*/
+			isDead = true;
+		} 
 	}
 
 	public void Heal (int health) {
-		//playerHealth.AdjustCurrentHealth (health);
+	//	playerHealth.AdjustCurrentHealth (health);
 	}
 
-	public void ResetPosition () {
+	[ClientRpc]
+	public void RpcResetPosition () {
 		transform.localPosition = Vector3.zero;
 		transform.localRotation = new Quaternion (0.0f, 0.0f, (SecondPlayer) ? 180.0f : 0.0f, 0.0f);
 		animator.SetBool ("isKilled", false);
-		//playerHealth.Show ();
-		//playerReload.Show ();
+		playerHealth.Show ();
+		playerReload.Show ();
 		if (burnParticles.isPlaying)
 			burnParticles.Stop ();
+		isDead = false;
 	}
 
 	public void SetNextBullet (GameObject bullet) {
@@ -190,25 +194,27 @@ public class PlayerController_Net : NetworkBehaviour {
 	 * Collider delegates
 	 *
 	 */
-
+	[ClientCallback]
 	void OnTriggerEnter2D(Collider2D collider) {
 		if (collider.gameObject.CompareTag ("Cover")) {
-			//playerHealth.Hide ();
-			//playerReload.Hide ();
+			playerHealth.Hide ();
+			playerReload.Hide ();
 		}
 	}
 
+	[ClientCallback]
 	void OnTriggerStay2D(Collider2D collider) {
 		if (collider.gameObject.CompareTag ("Cover")) {
-			//playerHealth.Hide ();
-			//playerReload.Hide ();
+			playerHealth.Hide ();
+			playerReload.Hide ();
 		}
 	}
 
+	[ClientCallback]
 	void OnTriggerExit2D(Collider2D collider) {
 		if (collider.gameObject.CompareTag ("Cover")) {
-			//playerHealth.Show ();
-			//playerReload.Show ();
+			playerHealth.Show ();
+			playerReload.Show ();
 		}
 	}
 }

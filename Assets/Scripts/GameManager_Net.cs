@@ -10,149 +10,174 @@ public class GameManager_Net : NetworkBehaviour
 
 	public GameObject mainMenu;
 
-	//public GameObject player1;
-	//public GameObject player2;
-
-	//public Text restartButtonText;
-	//public GameObject resumeGameButton;
 	public Text winText;
 
-	public bool isGameBegan = true;
 	public bool isPaused = false;
 	public bool isMenuShown = false;
 
 	public float HeartAppearRate = 30.0f;
 	public float NuclearAppearRate = 7.0f;
 
+	[SyncVar(hook="Player1ScoreChanged")]
 	private int Player1Score = 0;
+
+	[SyncVar(hook="Player2ScoreChanged")]
 	private int Player2Score = 0;
 
 	private BoardManager_Net boardScript;
 	private float heartTimer = 0.0f;
 	private float nuclearTimer = 0.0f;
 
+	private float restartTimer = 0.0f;
+
 	void Awake ()
 	{
 		boardScript = GetComponent<BoardManager_Net> ();
 		winText.enabled = false;
-		//StartGame ();`
 	}
 
-	public override void OnStartServer () {
+	public override void OnStartServer ()
+	{
 		StartGame ();
 	}
 
-	public override void OnStartLocalPlayer () {
+	public override void OnStartClient ()
+	{
 		StartLocalGame ();
 	}
 
-	void Update () {
+	[ClientCallback]
+	void Update ()
+	{
 		bool escape = Input.GetButtonDown ("Cancel");
 		if (escape) {
-			if (isGameBegan) {
-				isPaused = !isPaused;
-				if (isPaused) {
-					PauseGame ();
-				} else {
-					ResumeGame ();
-				}
+			isMenuShown = !isMenuShown;
+			if (isMenuShown) {
+				ShowMenu ();
 			} else {
-				PauseGame ();
+				HideMenu ();
 			}
-		}
+		} 
 
 		bool enter = Input.GetButtonDown ("Submit");
-		if (enter) {
-			if (!isGameBegan && !isMenuShown) {
-				StartGame ();
-			}
+		if (enter && isPaused) {
+			StartGame ();
 		}
 	}
 
-	void FixedUpdate () {
-		if (isGameBegan && !isPaused) {
-			heartTimer += Time.deltaTime;
-			nuclearTimer += Time.deltaTime;
+	[ServerCallback]
+	void FixedUpdate ()
+	{
+		heartTimer += Time.deltaTime;
+		nuclearTimer += Time.deltaTime;
 
-			if (heartTimer >= HeartAppearRate) {
+		if (heartTimer >= HeartAppearRate) {
 			//	boardScript.AddRandomHeart ();
-				heartTimer = 0.0f;
-			}
+			heartTimer = 0.0f;
+		}
 
-			if (nuclearTimer >= NuclearAppearRate) {
+		if (nuclearTimer >= NuclearAppearRate) {
 			//	boardScript.AddRandomNuclearPickup ();
-				nuclearTimer = 0.0f;
+			nuclearTimer = 0.0f;
+		}
+
+		if (isPaused) {
+			restartTimer += Time.deltaTime;
+			if (restartTimer >= 10.0f) {
+				RestartGame ();
+				isPaused = false;
 			}
 		}
 	}
 
-	void ResetPlayers () {
-	/*	PlayerController player1Controller = player1.GetComponentInChildren <PlayerController> ();
-		player1Controller.ResetPosition ();
-		PlayerHealth player1Health = player1.GetComponentInChildren<PlayerHealth> ();
-		player1Health.ResetHealth ();
+	void ResetPlayers ()
+	{
+		PlayerController_Net[] players =  FindObjectsOfType<PlayerController_Net> ();
 
-		PlayerController player2Controller = player2.GetComponentInChildren <PlayerController> ();
-		player2Controller.ResetPosition ();
-		PlayerHealth player2Health = player2.GetComponentInChildren<PlayerHealth> ();
-		player2Health.ResetHealth ();
-		*/
+		foreach (PlayerController_Net player in players) {
+			player.RpcResetPosition ();
+			PlayerHealth_Net health = player.GetComponentInChildren<PlayerHealth_Net> ();
+			health.RpcResetHealth ();
+		}
+	}
+
+	[Server]
+	void RestartGame ()
+	{
+		ResetPlayers ();
+		RpcResetUIState ();
+		StartGame ();
 	}
 
 	[Server]
 	public void StartGame ()
 	{
-		//winText.text = "";
-	//	winText.enabled = false;
 		boardScript.CmdSetupScene ();
-	//	boardScript.RpcBoardSetup ();
-		//ResetPlayers ();
-		isGameBegan = true;
-	//	ResumeGame ();
+		isPaused = false;
+	}
+		
+	public void StartLocalGame ()
+	{
+		boardScript.BoardSetup ();
+		isPaused = false;
+	}
+
+	[ClientRpc]
+	void RpcResetUIState () {
+		winText.text = "";
+		winText.enabled = false;
 	}
 
 	[Client]
-	public void StartLocalGame () {
-		winText.text = "";
-		winText.enabled = false;
-	//	boardScript.CmdSetupScene ();
-		boardScript.BoardSetup ();
-		//ResetPlayers ();
-		isGameBegan = true;
-		ResumeGame ();
-	}
-
-	public void PauseGame ()
+	public void ShowMenu ()
 	{
 		mainMenu.SetActive (true);
-		isPaused = true;
 		isMenuShown = true;
 	}
 
-	public void ResumeGame () {
+	[Client]
+	public void HideMenu ()
+	{
 		mainMenu.SetActive (false);
-		isPaused = false;
 		isMenuShown = false;
 	}
 
-	public void FinishGame (bool firstPlayerWin) {
-		isGameBegan = false;
+	[Server]
+	public void FinishGame (bool firstPlayerWin)
+	{
 		isPaused = true;
+		restartTimer = 0.0f;
 
 		string playerNum;
 		if (!firstPlayerWin) {
 			playerNum = "2";
-			Player2Score++;
+			Player2Score += 1;
 		} else {
 			playerNum = "1";
-			Player1Score++;
+			Player1Score += 1;
 		}
 
-		winText.text = "Player " + playerNum + " Win!\nScore " + Player1Score + " : " + Player2Score + "\nPress enter to\ncontinue";
+		RpcShowWinTextWith (playerNum, Player1Score, Player2Score);
+	}
+
+	[ClientRpc]
+	void RpcShowWinTextWith(string playerNum, int score1, int score2) {
+		winText.text = "Player " + playerNum + " Win!\nScore " + Player1Score + " : " + Player2Score + "\nNext round in 10 seconds...";
 		winText.enabled = true;
 	}
 
-	public int GetScoreForPlayer(int playerNum) {
+	void Player1ScoreChanged(int score) {
+		Player1Score = score;
+
+	}
+
+	void Player2ScoreChanged(int score) {
+		Player2Score = score;
+
+	}
+
+	public int GetScoreForPlayer (int playerNum)
+	{
 		if (playerNum == 1)
 			return Player1Score;
 		if (playerNum == 2)
