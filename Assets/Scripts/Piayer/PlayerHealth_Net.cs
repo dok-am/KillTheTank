@@ -31,8 +31,7 @@ public class PlayerHealth_Net : NetworkBehaviour {
 
 	[ClientCallback]
 	void Update ()
-	{
-		AdjustCurrentHealth (0);   
+	{  
 		float newPercent = ((float)curHealth / (float)maxHealth);
 		float lerpHealth = Mathf.Lerp (currentPercent, newPercent, Time.deltaTime * healthAnimationSpeed);
 		healthRenderer.SetPercent (lerpHealth);
@@ -59,11 +58,11 @@ public class PlayerHealth_Net : NetworkBehaviour {
 		if (maxHealth < 1)
 			maxHealth = 1;
 
-		OnHealthChanged (curHealth);
 	}
 
 	void OnHealthChanged(int NewHealth) {
 		curHealth = NewHealth;
+		Debug.Log ("Health updated on client: " + curHealth);
 	}
 
 	public void Hide () {

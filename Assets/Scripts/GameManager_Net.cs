@@ -11,6 +11,7 @@ public class GameManager_Net : NetworkBehaviour
 	public GameObject mainMenu;
 
 	public Text winText;
+	public Text scoreText;
 
 	public bool isPaused = false;
 	public bool isMenuShown = false;
@@ -34,6 +35,7 @@ public class GameManager_Net : NetworkBehaviour
 	{
 		boardScript = GetComponent<BoardManager_Net> ();
 		winText.enabled = false;
+		scoreText.enabled = false;
 	}
 
 	public override void OnStartServer ()
@@ -72,12 +74,12 @@ public class GameManager_Net : NetworkBehaviour
 		nuclearTimer += Time.deltaTime;
 
 		if (heartTimer >= HeartAppearRate) {
-			//	boardScript.AddRandomHeart ();
+			boardScript.AddRandomHeart ();
 			heartTimer = 0.0f;
 		}
 
 		if (nuclearTimer >= NuclearAppearRate) {
-			//	boardScript.AddRandomNuclearPickup ();
+			boardScript.AddRandomNuclearPickup ();
 			nuclearTimer = 0.0f;
 		}
 
@@ -105,6 +107,8 @@ public class GameManager_Net : NetworkBehaviour
 	void RestartGame ()
 	{
 		ResetPlayers ();
+		boardScript.ClearBoard ();
+		boardScript.ClearObjects ();
 		RpcResetUIState ();
 		StartGame ();
 	}
@@ -126,6 +130,8 @@ public class GameManager_Net : NetworkBehaviour
 	void RpcResetUIState () {
 		winText.text = "";
 		winText.enabled = false;
+		scoreText.text = "";
+		scoreText.enabled = false;
 	}
 
 	[Client]
@@ -157,23 +163,30 @@ public class GameManager_Net : NetworkBehaviour
 			Player1Score += 1;
 		}
 
-		RpcShowWinTextWith (playerNum, Player1Score, Player2Score);
+		RpcShowWinTextWith (playerNum);
 	}
 
 	[ClientRpc]
-	void RpcShowWinTextWith(string playerNum, int score1, int score2) {
-		winText.text = "Player " + playerNum + " Win!\nScore " + Player1Score + " : " + Player2Score + "\nNext round in 10 seconds...";
+	void RpcShowWinTextWith(string playerNum) {
+		winText.text = "Player " + playerNum + " Win!";
 		winText.enabled = true;
+		UpdateScoreText ();
+	}
+
+	[Client]
+	void UpdateScoreText () {
+		scoreText.text = "Score " + Player1Score + " : " + Player2Score + "\nNext round\nin 10 seconds...";
+		scoreText.enabled = true;
 	}
 
 	void Player1ScoreChanged(int score) {
 		Player1Score = score;
-
+		UpdateScoreText ();
 	}
 
 	void Player2ScoreChanged(int score) {
 		Player2Score = score;
-
+		UpdateScoreText ();
 	}
 
 	public int GetScoreForPlayer (int playerNum)

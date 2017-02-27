@@ -19,7 +19,11 @@ public class PlayerBarRenderer_Net : HideableSprite {
 
 	void FixedUpdate() 
 	{
-		transform.position = new Vector3 (target.position.x, target.position.y + yOffset, 0.0f);
+		if (target) {
+			transform.position = new Vector3 (target.position.x, target.position.y + yOffset, 0.0f);
+		} else {
+			Destroy (gameObject);
+		}
 	}
 		
 	protected override void Update ()

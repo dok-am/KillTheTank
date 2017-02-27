@@ -46,10 +46,8 @@ public class PlayerController_Net : NetworkBehaviour {
 		playerHealth = GetComponent<PlayerHealth_Net> ();
 		playerReload = GetComponent<PlayerReload_Net> ();
 
-		if (SecondPlayer) {
-			vAxisName += "Second";
-			hAxisName += "Second";
-			attackAxisName += "Second";
+		if (FindObjectsOfType<PlayerController_Net> ().Length > 1) {
+			SecondPlayer = true;
 		}
 	}
 		
@@ -121,6 +119,7 @@ public class PlayerController_Net : NetworkBehaviour {
 	void CmdSpawnBullet (Vector2 localUp) {
 		GameObject bullet = Instantiate (nextBullet, transform.position + new Vector3(localUp.x, localUp.y, 0.0f) * 0.5f, transform.rotation);
 		NetworkServer.Spawn (bullet);
+		nextBullet = Bullet;
 	}
 
 	void Shoot (Vector2 localUp) {
@@ -129,8 +128,6 @@ public class PlayerController_Net : NetworkBehaviour {
 		playerReload.isReadyToShoot = false;
 		playerReload.CmdReload ();
 		soundManager.PlayShoot ();
-
-		nextBullet = Bullet;
 	}
 
 	/*
@@ -159,7 +156,7 @@ public class PlayerController_Net : NetworkBehaviour {
 			burnParticles.Play ();
 		}
 
-		if (playerHealth.curHealth <= 0 && !FindObjectOfType<GameManager_Net>().isPaused && !isDead) {
+		if (playerHealth.curHealth <= 0 && !isDead) {
 			//GameOver
 			animator.SetBool("isMoving", false);
 			animator.SetBool("isKilled", true);
@@ -169,13 +166,14 @@ public class PlayerController_Net : NetworkBehaviour {
 		} 
 	}
 
+	[Server]
 	public void Heal (int health) {
-	//	playerHealth.AdjustCurrentHealth (health);
+		playerHealth.AdjustCurrentHealth (health);
 	}
 
 	[ClientRpc]
 	public void RpcResetPosition () {
-		transform.localPosition = Vector3.zero;
+		transform.localPosition = (SecondPlayer) ?  new Vector3(7.0f, 14.0f) : new Vector3(7.0f, 0.0f);
 		transform.localRotation = new Quaternion (0.0f, 0.0f, (SecondPlayer) ? 180.0f : 0.0f, 0.0f);
 		animator.SetBool ("isKilled", false);
 		playerHealth.Show ();
@@ -185,6 +183,7 @@ public class PlayerController_Net : NetworkBehaviour {
 		isDead = false;
 	}
 
+	[Server]
 	public void SetNextBullet (GameObject bullet) {
 		nextBullet = bullet;
 	}
@@ -196,7 +195,7 @@ public class PlayerController_Net : NetworkBehaviour {
 	 */
 	[ClientCallback]
 	void OnTriggerEnter2D(Collider2D collider) {
-		if (collider.gameObject.CompareTag ("Cover")) {
+		if (collider.gameObject.CompareTag ("Cover") && !isLocalPlayer) {
 			playerHealth.Hide ();
 			playerReload.Hide ();
 		}
@@ -204,7 +203,7 @@ public class PlayerController_Net : NetworkBehaviour {
 
 	[ClientCallback]
 	void OnTriggerStay2D(Collider2D collider) {
-		if (collider.gameObject.CompareTag ("Cover")) {
+		if (collider.gameObject.CompareTag ("Cover") && !isLocalPlayer) {
 			playerHealth.Hide ();
 			playerReload.Hide ();
 		}
@@ -212,7 +211,7 @@ public class PlayerController_Net : NetworkBehaviour {
 
 	[ClientCallback]
 	void OnTriggerExit2D(Collider2D collider) {
-		if (collider.gameObject.CompareTag ("Cover")) {
+		if (collider.gameObject.CompareTag ("Cover") && !isLocalPlayer) {
 			playerHealth.Show ();
 			playerReload.Show ();
 		}

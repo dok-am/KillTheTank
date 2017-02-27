@@ -66,6 +66,10 @@ public class BoardManager_Net : NetworkBehaviour {
 		
 	public void BoardSetup() 
 	{
+		if (isClient) {
+			ClientScene.RegisterPrefab (grassObject);
+		}
+
 		GameObject board = new GameObject ("Board");
 		boardHolder = board.transform;
 
@@ -118,7 +122,8 @@ public class BoardManager_Net : NetworkBehaviour {
 				int randomSeed = Random.Range (0, 3);
 				if (randomSeed < 2) {
 					GameObject grass = Instantiate (grassObject, new Vector3(x,y,0.0f), Quaternion.identity);
-					grass.transform.SetParent (boardHolder);
+					grass.transform.SetParent (objectsHolder.transform);
+					NetworkServer.Spawn (grass);
 
 					Predicate<Vector3> vectorPred = (Vector3 v) => {
 						return (v.x == (float)x && v.y == (float)y);
@@ -139,12 +144,12 @@ public class BoardManager_Net : NetworkBehaviour {
 		BoardSetup ();
 		InitObjectsHolder ();
 		InitializeList ();
-		//AddRandomGrassField ();
+		AddRandomGrassField ();
 		LayoutObjectAtRandom (destructibleTiles, new Count(destructibleCount/2, destructibleCount));
 	}
 
-	[ClientRpc]
-	void RpcClearBoard()
+	[Server]
+	public void ClearBoard()
 	{
 		if (boardHolder) {
 			Destroy (boardHolder.gameObject);
@@ -152,23 +157,28 @@ public class BoardManager_Net : NetworkBehaviour {
 	}
 
 	[Server]
-	void ClearObjects ()
+	public void ClearObjects ()
 	{
 		if (objectsHolder) {
 			NetworkServer.Destroy (objectsHolder);
 		}
 	}
 
+	[Server]
 	public void AddRandomHeart() {
-		Vector3 randomPosition = RandomPosition();
-		GameObject instance = Instantiate (heartObject, randomPosition, Quaternion.identity);
-		instance.transform.SetParent (boardHolder);
+		SpawnObjectAtRandomPosition (heartObject);
 	}
 
+	[Server]
 	public void AddRandomNuclearPickup() {
-		Vector3 randomPosition = RandomPosition();
-		GameObject instance = Instantiate (nuclearPickup, randomPosition, Quaternion.identity);
-		instance.transform.SetParent (boardHolder);
+		SpawnObjectAtRandomPosition (nuclearPickup);
 	}
 
+	[Server]
+	public void SpawnObjectAtRandomPosition(GameObject obj) {
+		Vector3 randomPosition = RandomPosition();
+		GameObject instance = Instantiate (obj, randomPosition, Quaternion.identity);
+		instance.transform.SetParent (boardHolder);
+		NetworkServer.Spawn (instance);
+	}
 }
