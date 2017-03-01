@@ -21,6 +21,8 @@ public class PlayerController_Net : NetworkBehaviour {
 	public ParticleSystem burnParticles;
 	public ParticleSystem explodeParticles;
 
+	public RuntimeAnimatorController SecondPlayerAnimation;
+
 	private Rigidbody2D rb;
 
 
@@ -48,10 +50,32 @@ public class PlayerController_Net : NetworkBehaviour {
 
 		if (FindObjectsOfType<PlayerController_Net> ().Length > 1) {
 			SecondPlayer = true;
-		}
+			animator.runtimeAnimatorController = SecondPlayerAnimation;
+		} 
 	}
 		
-		
+	void Start () {
+		if (SecondPlayer) {
+			playerHealth.SetDuplicator (GameObject.Find("Health2Dupl").GetComponent<SpriteDuplicator> ());
+			playerReload.SetDuplicator (GameObject.Find("Reload2Dupl").GetComponent<SpriteDuplicator> ());
+		} else {
+			playerHealth.SetDuplicator (GameObject.Find("Health1Dupl").GetComponent<SpriteDuplicator> ());
+			playerReload.SetDuplicator (GameObject.Find("Reload1Dupl").GetComponent<SpriteDuplicator> ());
+		}
+
+		if (isLocalPlayer) {
+			SelectUIForPlayer (SecondPlayer);
+		}
+	}
+
+	void SelectUIForPlayer(bool secondPlayer) {
+		LocalPlayerSelector[] selectors = FindObjectsOfType <LocalPlayerSelector> ();
+		foreach (LocalPlayerSelector selector in selectors) {
+			if (selector.isSecondPlayer == secondPlayer) {
+				selector.SelectRed ();
+			}
+		}
+	}
 
 	void FixedUpdate() {
 

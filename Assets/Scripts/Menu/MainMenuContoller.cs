@@ -23,6 +23,10 @@ public class MainMenuContoller : MonoBehaviour {
 		BeginQuitingWithAction (LoadSingGameScene);
 	}
 
+	public void StartMultiplayer () {
+		BeginQuitingWithAction (LoadMultiplayerLobby);
+	}
+
 	public void StopGameToMainMenu () {
 		BeginQuitingWithAction (LoadMainMenuScene);
 	}
@@ -66,6 +70,10 @@ public class MainMenuContoller : MonoBehaviour {
 
 	void LoadMainMenuScene() {
 		SceneManager.LoadScene ("MainMenu");
+	}
+
+	void LoadMultiplayerLobby () {
+		SceneManager.LoadScene ("Lobby");
 	}
 
 }

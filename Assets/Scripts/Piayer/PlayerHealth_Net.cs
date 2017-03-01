@@ -15,6 +15,7 @@ public class PlayerHealth_Net : NetworkBehaviour {
 	public float healthAnimationSpeed = 10.0f;
 
 	private PlayerBarRenderer_Net healthRenderer;
+	private SpriteDuplicator healthDuplicator;
 
 	private float currentPercent = 1.0f;
 
@@ -27,6 +28,7 @@ public class PlayerHealth_Net : NetworkBehaviour {
 		healthRenderer = health.GetComponent<PlayerBarRenderer_Net> ();
 		healthRenderer.yOffset = 0.8f;
 		healthRenderer.target = transform;
+		healthRenderer.duplicator = healthDuplicator;
 	}
 
 	[ClientCallback]
@@ -71,5 +73,9 @@ public class PlayerHealth_Net : NetworkBehaviour {
 
 	public void Show () {
 		healthRenderer.Show ();
+	}
+
+	public void SetDuplicator(SpriteDuplicator duplicator) {
+		healthDuplicator = duplicator;
 	}
 }

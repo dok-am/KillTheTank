@@ -12,6 +12,7 @@ public class PlayerReload_Net : NetworkBehaviour {
 	public bool isReadyToShoot = false;
 
 	private PlayerBarRenderer_Net reloadRenderer;
+	private SpriteDuplicator reloadDuplicator;
 
 	private float timer = 0.0f;
 
@@ -26,7 +27,7 @@ public class PlayerReload_Net : NetworkBehaviour {
 
 		reloadRenderer = reload.GetComponent<PlayerBarRenderer_Net> ();
 		reloadRenderer.target = transform;
-		//reloadRenderer.transform.SetParent (transform);
+		reloadRenderer.duplicator = reloadDuplicator;
 	}
 	
 	[ServerCallback]
@@ -56,5 +57,9 @@ public class PlayerReload_Net : NetworkBehaviour {
 
 	public void Show () {
 		reloadRenderer.Show ();
+	}
+
+	public void SetDuplicator(SpriteDuplicator duplicator) {
+		reloadDuplicator = duplicator;
 	}
 }
