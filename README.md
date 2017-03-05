@@ -21,4 +21,10 @@ Basic game
 * ~Nuclear bullets~
 * Added sound settings
 
+*v.0.3*
+-
+
+* Implemented simple multiplayer with standart UI (works only in local network).
+* Implemented infinite single and multiplayer gameplay with scores
+
 --
